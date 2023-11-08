@@ -1,0 +1,64 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_ADXL345_U.h>
+
+
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified();
+
+
+void setup() {
+  pinMode(3, INPUT);
+  pinMode(4, OUTPUT);
+  pinMode(2, INPUT);
+  digitalWrite(4, LOW);
+  if(!accel.begin())
+   {
+      Serial.println("No ADXL345 sensor detected.");
+      while(1);
+   }
+   Serial.begin(9600);
+}
+
+
+void loop() {
+  int sensorVal = analogRead(A1);
+  Serial.print("Sensor Value: ");
+  Serial.print(sensorVal);
+
+
+  float voltage = (sensorVal / 1535.0) * 5.0;
+  Serial.print(" Volts: ");
+  Serial.print(voltage);
+
+
+  float temperature = (voltage - 0.5) * 100.0;
+  Serial.print(" Temperature: ");
+  Serial.println(temperature);
+
+
+  sensors_event_t event;
+  accel.getEvent(&event);
+  double x {event.acceleration.x};
+  double y {event.acceleration.y};
+  double z {event.acceleration.z};
+  double total {sqrt(sq(x)+sq(y)+sq(z))};
+  Serial.println(total);
+
+
+  if(temperature > 30)
+  {
+    digitalWrite(4, HIGH);
+  }
+  if (digitalRead(3) == HIGH) {
+    digitalWrite(4, HIGH);
+  }
+  if (digitalRead(2) == HIGH) {
+    digitalWrite(4, LOW);
+  }
+  if(total > 14){
+    digitalWrite(4, HIGH);
+  }
+
+
+  delay(1000);
+}
